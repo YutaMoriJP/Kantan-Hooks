@@ -6,11 +6,10 @@ import { useEffect, useRef } from "react";
  */
 
 const usePrevious = <T>(val: T): T => {
-  const ref = useRef(val);
-  useEffect((): void => {
+  const ref = useRef<T | null>(null);
+  useEffect(() => {
     ref.current = val;
   }, [val, ref]);
-
   return ref.current!;
 };
 

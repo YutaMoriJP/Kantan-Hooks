@@ -4,4 +4,7 @@ import useClipboard from "./useClipboard/useClipboard";
 import useMediaQuery from "./useMediaQuery/useMediaQuery";
 import useFetch from "./useFetch/useFetch";
 import useAbortController from "./useFetch/useAbortController";
-export { useToggle, useInput, useClipboard, useMediaQuery, useFetch, useAbortController, };
+import useHistory from "./useHistory/useHistory";
+import usePrevious from "./usePrevious/usePrevious";
+import useLocalStorage from "./useLocalStorage/useLocalStorage";
+export { useToggle, useInput, useClipboard, useMediaQuery, useFetch, useAbortController, useHistory, usePrevious, useLocalStorage, };

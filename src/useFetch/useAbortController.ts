@@ -25,6 +25,7 @@ const useAbortController = (startNewAbortController: boolean = false) => {
       abosrtController.current = initAbortInstance();
     }
   }, [startNewAbortController, abosrtController.current.signal.aborted]);
+
   //only runs when component is unmounted, and controller.abort needs to be called to cancel fetch request
   useEffect(() => {
     return (): void => {

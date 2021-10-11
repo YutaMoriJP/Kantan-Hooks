@@ -1,7 +1,10 @@
 import { useState, useCallback } from "react";
 
 type Options = {
-  handleChange: (value: string, previousValue: string) => typeof value;
+  handleChange: (
+    value: string | number,
+    previousValue: string | number
+  ) => typeof value;
 };
 
 /**
@@ -10,7 +13,7 @@ type Options = {
  * @param {Object} options - The options object can have a handleChange method that restricts the new input field value. For example, if lower case isn't allowed, the function can return value.toUpperCase()
  */
 
-const useInput = (initial: string = "", options?: Options) => {
+const useInput = (initial: string | number = "", options?: Options) => {
   const [value, setValue] = useState(initial);
   const onChange = (
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>

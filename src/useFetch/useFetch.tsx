@@ -43,10 +43,6 @@ const useFetch = (
   getData: typeof fetchData,
   params: Object = {}
 ) => {
-  useEffect(() => {
-    console.log("usefetch mounts");
-    return () => console.log("usefetch unmounts");
-  }, []);
   const abortController = useAbortController(false);
 
   const [{ status, data, error }, dispatch] = useReducer(reducer, initial);
@@ -74,7 +70,6 @@ const useFetch = (
     asyncSetState();
 
     return () => {
-      console.log("useFetch cleanup");
       isCanceled = true;
     };
   }, [url]);

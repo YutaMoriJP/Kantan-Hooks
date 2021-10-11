@@ -30,10 +30,12 @@ const useClipboard = (
   copied: boolean,
   onOpen?: () => void
 ) => {
+  console.log("useClipboard", toBeCopied, copied);
   const [{ status, error }, setStatus] = useState<ClipboardState>({
     status: "idle",
     error: null,
   });
+  const [previous, setPrevious] = useState("");
   //blocks copy function from running in initial mount, and only copies value to clipboard if user chooses to do so
   const initialMount = useRef(true);
   //checks if window.navigator has the 'clipboard' property - must be called AFTER useState is called or else state is hooked conditionally
@@ -48,10 +50,7 @@ const useClipboard = (
   //copying to the clipboard is an asynchronous operation
   //so the async operation is run inside useEffect
   useEffect(() => {
-    //if string is empty then return from function and do not copy to clipboard as that's pointless
-
-    //will prevent setting state when component uses this hook is unmounted
-    if (!toBeCopied) return;
+    //will prevent setting state when component using this hook is unmounted
     let isCanceled = false;
     const copy = async (): Promise<void> => {
       //prevents copy to run on initial mount and only copy to the clipboard if the user gives permission
@@ -64,9 +63,11 @@ const useClipboard = (
         //it's asynchronous so the copying does not block the browser from rendering
         await navigator.clipboard.writeText(toBeCopied);
         //sets the status to 'resolved', so it was a success
-        if (!isCanceled) setStatus({ status: "resolved", error: null });
+        if (!isCanceled) {
+          setStatus({ status: "resolved", error: null });
+          setPrevious(toBeCopied);
+        }
         //opens success message
-        //opens failure message
         if (typeof onOpen === "function") {
           onOpen();
         }
@@ -84,9 +85,12 @@ const useClipboard = (
         }
       }
     };
+    //only call copy function if previous value is NOT the same as the new value
+    //if the new value is an empty string, then don't call copy either because that's pointless
+    if (previous !== toBeCopied && toBeCopied !== "") {
+      copy();
+    }
 
-    //call the copy function - copies value to clipboard
-    copy();
     return () => {
       //prevents state from updating on unmounted components
       isCanceled = true;
@@ -94,7 +98,8 @@ const useClipboard = (
       //if this control isn't implemented, the copy function will always run in the initial mount and control a value to the user's clipboard without proper permission
       initialMount.current = false;
     };
-  }, [toBeCopied, copied, onOpen]);
+  }, [copied, onOpen]);
+
   //useClipboard returns an object with status properties as well as the error object
   //if async op. is rejected
   return {
@@ -105,5 +110,4 @@ const useClipboard = (
     error,
   };
 };
-
 export default useClipboard;
