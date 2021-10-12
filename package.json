@@ -1,13 +1,13 @@
 {
   "name": "kantan-hooks",
-  "version": "1.1.4",
+  "version": "1.1.5",
   "description": "",
   "main": "dist/index.js",
   "scripts": {
     "start": "rollup -c",
     "build": "rollup -c -w"
   },
-  "keywords": [],
+  "keywords": ["React", "React Hooks", "utility"],
   "author": "Yuta Mori",
   "license": "ISC",
   "devDependencies": {
