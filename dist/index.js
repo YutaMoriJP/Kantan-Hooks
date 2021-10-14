@@ -80,7 +80,6 @@ function __awaiter(thisArg, _arguments, P, generator) {
  * @param {Function} onOpen - opens a notification like 'value copied' or 'failed to copy'
  */
 const useClipboard = (toBeCopied, copied, onOpen) => {
-    console.log("useClipboard", toBeCopied, copied);
     const [{ status, error }, setStatus] = react.useState({
         status: "idle",
         error: null,
@@ -339,12 +338,44 @@ const useLocalStorage = (defaultValue = "", key, { serialize = JSON.stringify, d
     return [state, setState];
 };
 
+const useWidth = (ref) => {
+    const [width, setWidth] = react.useState(null);
+    react.useLayoutEffect(() => {
+        const element = ref.current;
+        const widthProp = Window.prototype.isPrototypeOf(ref.current)
+            ? "innerWidth"
+            : "clientWidth";
+        setWidth(element[widthProp]);
+        const handleResize = () => setWidth(element[widthProp]);
+        window.addEventListener("resize", handleResize);
+        return () => window.removeEventListener("resize", handleResize);
+    }, [ref]);
+    return width;
+};
+
+const useHeight = (ref) => {
+    const [height, setHeight] = react.useState(null);
+    react.useLayoutEffect(() => {
+        const element = ref.current;
+        const heightProp = Window.prototype.isPrototypeOf(ref.current)
+            ? "innerHeight"
+            : "clientHeight";
+        setHeight(element[heightProp]);
+        const handleResize = () => setHeight(element[heightProp]);
+        window.addEventListener("resize", handleResize);
+        return () => window.removeEventListener("resize", handleResize);
+    }, [ref]);
+    return height;
+};
+
 exports.useAbortController = useAbortController;
 exports.useClipboard = useClipboard;
 exports.useFetch = useFetch;
+exports.useHeight = useHeight;
 exports.useHistory = useHistory;
 exports.useInput = useInput;
 exports.useLocalStorage = useLocalStorage;
 exports.useMediaQuery = useMediaQuery;
 exports.usePrevious = usePrevious;
 exports.useToggle = useToggle;
+exports.useWidth = useWidth;

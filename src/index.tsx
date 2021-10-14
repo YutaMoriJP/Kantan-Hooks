@@ -7,6 +7,9 @@ import useAbortController from "./useFetch/useAbortController";
 import useHistory from "./useHistory/useHistory";
 import usePrevious from "./usePrevious/usePrevious";
 import useLocalStorage from "./useLocalStorage/useLocalStorage";
+import useWidth from "./useWidth";
+import useHeight from "./useHeight";
+
 export {
   useToggle,
   useInput,
@@ -17,4 +20,6 @@ export {
   useHistory,
   usePrevious,
   useLocalStorage,
+  useWidth,
+  useHeight,
 };

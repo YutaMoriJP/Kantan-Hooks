@@ -30,7 +30,6 @@ const useClipboard = (
   copied: boolean,
   onOpen?: () => void
 ) => {
-  console.log("useClipboard", toBeCopied, copied);
   const [{ status, error }, setStatus] = useState<ClipboardState>({
     status: "idle",
     error: null,
