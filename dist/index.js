@@ -402,10 +402,15 @@ const useHeight = (ref) => {
                 timerRunning = true;
             }
         };
-        window.addEventListener("scroll", debounce);
+        //only subscribe to scroll event if ref is a DOM node and window object
+        if (heightProp !== "innerHeight")
+            window.addEventListener("scroll", debounce);
         //import when window is resized and viewport height is changed
         window.addEventListener("resize", debounce);
-        return () => window.removeEventListener("scroll", debounce);
+        return () => {
+            window.removeEventListener("scroll", debounce);
+            clearTimeout(timerID.current);
+        };
     }, [ref, timerID]);
     return Math.floor(height);
 };
