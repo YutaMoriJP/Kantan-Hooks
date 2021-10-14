@@ -339,33 +339,115 @@ const useLocalStorage = (defaultValue = "", key, { serialize = JSON.stringify, d
 };
 
 const useWidth = (ref) => {
+    //used for timer in debounce function
+    const timerID = react.useRef(null);
     const [width, setWidth] = react.useState(null);
     react.useLayoutEffect(() => {
+        //for easier read - not important
         const element = ref.current;
+        //checks if ref is DOM node or window object
         const widthProp = Window.prototype.isPrototypeOf(ref.current)
             ? "innerWidth"
             : "clientWidth";
+        //sets the initial width, and not AFTER 'resize' occurs
         setWidth(element[widthProp]);
+        //caled by `resize`
         const handleResize = () => setWidth(element[widthProp]);
-        window.addEventListener("resize", handleResize);
-        return () => window.removeEventListener("resize", handleResize);
-    }, [ref]);
+        //used for debouncing state setter function - not set state for every `resize`
+        let timerRunning = false;
+        const debounce = () => {
+            //if timerRunning is true, then don't set state
+            if (!timerRunning) {
+                timerID.current = setTimeout(() => {
+                    handleResize();
+                    //timer finished
+                    timerRunning = false;
+                }, 600);
+            }
+            //timer is running
+            timerRunning = true;
+        };
+        window.addEventListener("resize", debounce);
+        return () => {
+            window.removeEventListener("resize", debounce);
+            clearTimeout(timerID.current);
+        };
+    }, [ref, timerID]);
     return width;
 };
 
 const useHeight = (ref) => {
+    //used for debounce function
+    const timerID = react.useRef(null);
     const [height, setHeight] = react.useState(null);
     react.useLayoutEffect(() => {
-        const element = ref.current;
+        //checks if ref is dom node or window object
         const heightProp = Window.prototype.isPrototypeOf(ref.current)
             ? "innerHeight"
             : "clientHeight";
+        //for easier read - not important
+        const element = ref.current;
+        //sets new height - height + 0.1 is necessary to update the height on scroll even
+        const handleResize = () => setHeight(element[heightProp] + 0.1);
+        //sets initial height and not AFTER scroll is fired
         setHeight(element[heightProp]);
-        const handleResize = () => setHeight(element[heightProp]);
-        window.addEventListener("resize", handleResize);
-        return () => window.removeEventListener("resize", handleResize);
-    }, [ref]);
-    return height;
+        let timerRunning = false;
+        //used for debouncing state setter function
+        const debounce = () => {
+            if (!timerRunning) {
+                timerID.current = setTimeout(() => {
+                    handleResize();
+                    timerRunning = false;
+                }, 600);
+                timerRunning = true;
+            }
+        };
+        window.addEventListener("scroll", debounce);
+        //import when window is resized and viewport height is changed
+        window.addEventListener("resize", debounce);
+        return () => window.removeEventListener("scroll", debounce);
+    }, [ref, timerID]);
+    return Math.floor(height);
+};
+
+//returns an array with numbers with their floor
+const getFloor = (...rest) => rest.map(Math.floor);
+//calculates actual available space from top, right, bottom, and left
+//learn more how getBoundingClientRect can be used - https://developer.mozilla.org/en-US/docs/Web/API/Element/getBoundingClientRect
+const calculateActualRect = (rect, w, h) => {
+    const { left: l, right: r, top: t, bottom: b } = rect;
+    //gets the floor of all numbers
+    const [left, right, top, bottom, width, height] = getFloor(l, r, t, b, w, h);
+    //calculates actual space available on the right side
+    const calcualtedRight = width - right;
+    //calculates actual space available below
+    const calculatedBottom = height - bottom;
+    return {
+        top,
+        right: calcualtedRight,
+        bottom: calculatedBottom,
+        left,
+    };
+};
+/**
+ *
+ * @param {object} ref - pass a ref that references a DOM node
+ * @returns {object} - in the first render, it returns an empty object, then it returns the position of the DOM node {top, right, bottom, left}
+ */
+const usePosition = (ref) => {
+    var _a;
+    //hooks cannot be called conditionally, so call them here
+    const height = useHeight({ current: window });
+    const width = useWidth({ current: window });
+    //ref.current will point at null initially
+    const rect = (_a = ref.current) === null || _a === void 0 ? void 0 : _a.getBoundingClientRect();
+    //if rect is undefined (ref.current=null), then return empty object
+    if (!rect) {
+        //this is returned in the initial render
+        return {};
+    }
+    //this will be called after the initial render and returns the desired object
+    return calculateActualRect(rect, width, height);
 };
 
 exports.useAbortController = useAbortController;
@@ -376,6 +458,7 @@ exports.useHistory = useHistory;
 exports.useInput = useInput;
 exports.useLocalStorage = useLocalStorage;
 exports.useMediaQuery = useMediaQuery;
+exports.usePosition = usePosition;
 exports.usePrevious = usePrevious;
 exports.useToggle = useToggle;
 exports.useWidth = useWidth;

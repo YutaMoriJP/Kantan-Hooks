@@ -9,6 +9,7 @@ import usePrevious from "./usePrevious/usePrevious";
 import useLocalStorage from "./useLocalStorage/useLocalStorage";
 import useWidth from "./useWidth";
 import useHeight from "./useHeight";
+import usePosition from "./usePosition";
 
 export {
   useToggle,
@@ -22,4 +23,5 @@ export {
   useLocalStorage,
   useWidth,
   useHeight,
+  usePosition,
 };
