@@ -343,6 +343,7 @@ const useWidth = (ref) => {
     const timerID = react.useRef(null);
     const [width, setWidth] = react.useState(null);
     react.useLayoutEffect(() => {
+        console.log("laytout effect called");
         //for easier read - not important
         const element = ref.current;
         //checks if ref is DOM node or window object
@@ -356,23 +357,23 @@ const useWidth = (ref) => {
         //used for debouncing state setter function - not set state for every `resize`
         let timerRunning = false;
         const debounce = () => {
-            //if timerRunning is true, then don't set state
             if (!timerRunning) {
+                clearTimeout(timerID.current);
                 timerID.current = setTimeout(() => {
                     handleResize();
-                    //timer finished
                     timerRunning = false;
-                }, 600);
+                }, 800);
             }
-            //timer is running
-            timerRunning = true;
+            else {
+                timerRunning = true;
+            }
         };
         window.addEventListener("resize", debounce);
         return () => {
             window.removeEventListener("resize", debounce);
             clearTimeout(timerID.current);
         };
-    }, [ref, timerID]);
+    }, []);
     return width;
 };
 
@@ -387,32 +388,45 @@ const useHeight = (ref) => {
             : "clientHeight";
         //for easier read - not important
         const element = ref.current;
-        //sets new height - height + 0.1 is necessary to update the height on scroll even
-        const handleResize = () => setHeight(element[heightProp] + 0.1);
         //sets initial height and not AFTER scroll is fired
         setHeight(element[heightProp]);
-        let timerRunning = false;
+        let scrollTimerRunning = false;
         //used for debouncing state setter function
-        const debounce = () => {
-            if (!timerRunning) {
+        const debounceScroll = () => {
+            if (!scrollTimerRunning) {
+                clearTimeout(timerID.current);
                 timerID.current = setTimeout(() => {
-                    handleResize();
-                    timerRunning = false;
-                }, 600);
-                timerRunning = true;
+                    setHeight(previous => {
+                        return previous + 0.0000001;
+                    });
+                    scrollTimerRunning = false;
+                }, 800);
+            }
+            else {
+                scrollTimerRunning = true;
             }
         };
-        //only subscribe to scroll event if ref is a DOM node and window object
-        if (heightProp !== "innerHeight")
-            window.addEventListener("scroll", debounce);
-        //import when window is resized and viewport height is changed
-        window.addEventListener("resize", debounce);
-        return () => {
-            window.removeEventListener("scroll", debounce);
-            clearTimeout(timerID.current);
+        //scroll and resize handler need to have slightly different logic
+        const debounceResize = () => {
+            {
+                clearTimeout(timerID.current);
+                timerID.current = setTimeout(() => {
+                    setHeight(() => {
+                        return element[heightProp];
+                    });
+                    scrollTimerRunning = false;
+                }, 800);
+            }
         };
-    }, [ref, timerID]);
-    return Math.floor(height);
+        window.addEventListener("scroll", debounceScroll);
+        window.addEventListener("resize", debounceResize);
+        return () => {
+            window.removeEventListener("scroll", debounceScroll);
+            window.removeEventListener("resize", debounceResize);
+        };
+    }, []);
+    let num = Math.floor(height);
+    return num;
 };
 
 //returns an array with numbers with their floor

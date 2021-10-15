@@ -7,6 +7,7 @@ const useWidth = <T extends React.RefObject<HTMLElement> | { current: Window }>(
   const timerID = useRef<NodeJS.Timeout>(null!);
   const [width, setWidth] = useState(null);
   useLayoutEffect(() => {
+    console.log("laytout effect called");
     //for easier read - not important
     const element: (HTMLElement | Window) & {
       [key: string]: any;
@@ -22,23 +23,22 @@ const useWidth = <T extends React.RefObject<HTMLElement> | { current: Window }>(
     //used for debouncing state setter function - not set state for every `resize`
     let timerRunning = false;
     const debounce = () => {
-      //if timerRunning is true, then don't set state
       if (!timerRunning) {
+        clearTimeout(timerID.current);
         timerID.current = setTimeout(() => {
           handleResize();
-          //timer finished
           timerRunning = false;
-        }, 600);
+        }, 800);
+      } else {
+        timerRunning = true;
       }
-      //timer is running
-      timerRunning = true;
     };
     window.addEventListener("resize", debounce);
     return () => {
       window.removeEventListener("resize", debounce);
       clearTimeout(timerID.current);
     };
-  }, [ref, timerID]);
+  }, []);
   return width;
 };
 
