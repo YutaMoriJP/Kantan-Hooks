@@ -1,4 +1,6 @@
 import { useState, useEffect, useRef } from "react";
+import * as clipboard from "clipboard-polyfill/text"; //while clipboard is supported by all major browsers
+//old safari has issue when calling clipboard.writeText
 
 type ClipboardState =
   | {
@@ -38,6 +40,8 @@ const useClipboard = (
   //blocks copy function from running in initial mount, and only copies value to clipboard if user chooses to do so
   const initialMount = useRef(true);
   //checks if window.navigator has the 'clipboard' property - must be called AFTER useState is called or else state is hooked conditionally
+  //causes issue in old safari...
+  /*
   if (!("clipboard" in navigator))
     setStatus(() => ({
       status: "rejected",
@@ -45,6 +49,7 @@ const useClipboard = (
         "Clipboard API is not supported, please use a modern browser like Chrome or Firefox"
       ),
     }));
+     */
 
   //copying to the clipboard is an asynchronous operation
   //so the async operation is run inside useEffect
@@ -60,7 +65,7 @@ const useClipboard = (
         //writeText receives the value to copy to the clipboard
         //it resolved to a promise when the async op. is done
         //it's asynchronous so the copying does not block the browser from rendering
-        await navigator.clipboard.writeText(toBeCopied);
+        await clipboard.writeText(toBeCopied);
         //sets the status to 'resolved', so it was a success
         if (!isCanceled) {
           setStatus({ status: "resolved", error: null });
