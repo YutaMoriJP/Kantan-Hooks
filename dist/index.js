@@ -14,6 +14,27 @@ function ___$insertStyle(css) {
 Object.defineProperty(exports, '__esModule', { value: true });
 
 var react = require('react');
+var clipboard = require('clipboard-polyfill/text');
+
+function _interopNamespace(e) {
+  if (e && e.__esModule) return e;
+  var n = Object.create(null);
+  if (e) {
+    Object.keys(e).forEach(function (k) {
+      if (k !== 'default') {
+        var d = Object.getOwnPropertyDescriptor(e, k);
+        Object.defineProperty(n, k, d.get ? d : {
+          enumerable: true,
+          get: function () { return e[k]; }
+        });
+      }
+    });
+  }
+  n["default"] = e;
+  return Object.freeze(n);
+}
+
+var clipboard__namespace = /*#__PURE__*/_interopNamespace(clipboard);
 
 const useToggle = (initial = false) => {
     const [open, setOpen] = react.useState(initial);
@@ -88,11 +109,16 @@ const useClipboard = (toBeCopied, copied, onOpen) => {
     //blocks copy function from running in initial mount, and only copies value to clipboard if user chooses to do so
     const initialMount = react.useRef(true);
     //checks if window.navigator has the 'clipboard' property - must be called AFTER useState is called or else state is hooked conditionally
+    //causes issue in old safari...
+    /*
     if (!("clipboard" in navigator))
-        setStatus(() => ({
-            status: "rejected",
-            error: new Error("Clipboard API is not supported, please use a modern browser like Chrome or Firefox"),
-        }));
+      setStatus(() => ({
+        status: "rejected",
+        error: new Error(
+          "Clipboard API is not supported, please use a modern browser like Chrome or Firefox"
+        ),
+      }));
+       */
     //copying to the clipboard is an asynchronous operation
     //so the async operation is run inside useEffect
     react.useEffect(() => {
@@ -109,7 +135,7 @@ const useClipboard = (toBeCopied, copied, onOpen) => {
                 //writeText receives the value to copy to the clipboard
                 //it resolved to a promise when the async op. is done
                 //it's asynchronous so the copying does not block the browser from rendering
-                yield navigator.clipboard.writeText(toBeCopied);
+                yield clipboard__namespace.writeText(toBeCopied);
                 //sets the status to 'resolved', so it was a success
                 if (!isCanceled) {
                     setStatus({ status: "resolved", error: null });
