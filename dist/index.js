@@ -108,22 +108,22 @@ const useClipboard = (toBeCopied, copied, onOpen) => {
     const [previous, setPrevious] = react.useState("");
     //blocks copy function from running in initial mount, and only copies value to clipboard if user chooses to do so
     const initialMount = react.useRef(true);
-    //checks if window.navigator has the 'clipboard' property - must be called AFTER useState is called or else state is hooked conditionally
-    //causes issue in old safari...
-    /*
-    if (!("clipboard" in navigator))
-      setStatus(() => ({
-        status: "rejected",
-        error: new Error(
-          "Clipboard API is not supported, please use a modern browser like Chrome or Firefox"
-        ),
-      }));
-       */
     //copying to the clipboard is an asynchronous operation
     //so the async operation is run inside useEffect
     react.useEffect(() => {
         //will prevent setting state when component using this hook is unmounted
         let isCanceled = false;
+        //if clipboard API is not supported, return an error message
+        //this MUST be called inside useEffect, and status must be checked that it is NOT rejected
+        //or else it will cause an infinite loop (multiple re-renders error)
+        if (!("clipboard" in navigator)) {
+            if (status !== "rejected")
+                setStatus(() => ({
+                    status: "rejected",
+                    error: new Error("Clipboard API is not supported, please use a modern browser like Chrome or Firefox"),
+                }));
+            return;
+        }
         const copy = () => __awaiter(void 0, void 0, void 0, function* () {
             //prevents copy to run on initial mount and only copy to the clipboard if the user gives permission
             if (initialMount.current)
@@ -197,7 +197,14 @@ const useMediaQuery = (query) => {
     const [mediaQuery, setMediaQuery] = react.useState(mql.matches);
     react.useEffect(() => {
         const onChange = () => setMediaQuery(mql.matches);
-        mql.addEventListener("change", onChange);
+        if ("addEventListener" in mql) {
+            mql.addEventListener("change", onChange);
+            return;
+            //safari 13.1 and lower does not support addEventListener
+        }
+        else if ("addListener" in mql) {
+            mql.addListener(onChange);
+        }
     }, [mql]);
     return mediaQuery;
 };

@@ -21,7 +21,13 @@ const useMediaQuery = (query: string) => {
   const [mediaQuery, setMediaQuery] = useState(mql.matches);
   useEffect((): void => {
     const onChange = (): void => setMediaQuery(mql.matches);
-    mql.addEventListener("change", onChange);
+    if ("addEventListener" in mql) {
+      mql.addEventListener("change", onChange);
+      return;
+      //safari 13.1 and lower does not support addEventListener
+    } else if ("addListener" in mql) {
+      mql.addListener(onChange);
+    }
   }, [mql]);
   return mediaQuery;
 };
