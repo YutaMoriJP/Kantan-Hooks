@@ -189,8 +189,8 @@ const useClipboard = (toBeCopied, copied, onOpen) => {
 //go to src/Navbar.js to see how this hook can be utilized!
 /**
  *
- * @param {String} query - must be a media query like (min-width:300px) or (max-width:500px)
- * @returns {Boolean} - returns a boolean if the media query matches the viewport, i.e. if the viewport width is 400px and the media query is (min-width:500px) then the return value is true
+ * @param {string} query - must be a media query like (min-width:300px) or (max-width:500px)
+ * @returns {Boolean} - returns a boolean if the media query matches the viewport
  */
 const useMediaQuery = (query) => {
     const mql = window.matchMedia(query);
