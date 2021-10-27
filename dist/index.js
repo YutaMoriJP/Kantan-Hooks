@@ -180,38 +180,20 @@ const useClipboard = (toBeCopied, copied, onOpen) => {
     };
 };
 
-/*
-const useMediaQuery = (query: string) => {
-  const mql: MediaQueryList = window.matchMedia(query);
-  const [mediaQuery, setMediaQuery] = useState(mql.matches);
-  useEffect((): void => {
-    const onChange = (): void => setMediaQuery(mql.matches);
-    if ("addEventListener" in mql) {
-      mql.addEventListener("change", onChange);
-      return;
-      //safari 13.1 and lower does not support addEventListener
-    } else if ("addListener" in mql) {
-      mql.addListener(onChange);
-    }
-  }, [mql]);
-  return mediaQuery;
-};
-*/
 const useMediaQuery = (query) => {
     const [mediaQuery, setMediaQuery] = react.useState(() => {
         //if code runs client side, then set media query immediately
-        if (typeof window !== "undefined")
-            return window.matchMedia(query).matches;
+        //if (typeof window !== "undefined") return window.matchMedia(query).matches;
         return false;
     });
     const [resolved, setResolved] = react.useState(() => {
         //if code is executed client side - resolved is true
-        if (typeof window !== "undefined")
-            return true;
+        //if (typeof window !== "undefined") return true;
         //runs server side - resolved is false
         return false;
     });
     react.useEffect(() => {
+        console.log("useMediaQuery window");
         const mql = window.matchMedia(query);
         setMediaQuery(window.matchMedia(query).matches);
         setResolved(true);
@@ -223,16 +205,23 @@ const useMediaQuery = (query) => {
         else if ("addListener" in mql) {
             mql.addListener(onChange);
         }
+        return () => {
+            if ("addEventListener" in mql) {
+                mql.removeEventListener("change", onChange);
+                //safari 13.1 and lower does not support addEventListener
+            }
+            else if ("addListener" in mql) {
+                mql.removeListener(onChange);
+            }
+        };
     }, []);
     return [mediaQuery, resolved];
 };
 
-//check if abort controller is supported by the browser
-const isAbortControllerSupported = window.hasOwnProperty("AbortController");
 //if abort is not supported, pass a no-op function
 const abort = () => null;
 //a function that creates a new abort controller instance
-const initAbortInstance = () => isAbortControllerSupported
+const initAbortInstance = () => window.hasOwnProperty("AbortController")
     ? new AbortController()
     : { signal: { aborted: false }, abort };
 /**
@@ -241,8 +230,16 @@ const initAbortInstance = () => isAbortControllerSupported
  * @returns
  */
 const useAbortController = (startNewAbortController = false) => {
-    const abosrtController = react.useRef(initAbortInstance());
+    const abosrtController = react.useRef(null);
     //runs if new fetch request was ABORTED, and new abortController should be instantiated
+    //only runs when component is unmounted, and controller.abort needs to be called to cancel fetch request
+    react.useEffect(() => {
+        //set abort instance inside effect to handle serve side rendered app, e.g. NextJS
+        abosrtController.current = initAbortInstance();
+        return () => {
+            abosrtController.current.abort();
+        };
+    }, []);
     react.useEffect(() => {
         //if startNewAbortController is true then new controller needs to be instantiated
         //if abortController.current.signal.aborted is true, then request was aborted
@@ -250,14 +247,51 @@ const useAbortController = (startNewAbortController = false) => {
             abosrtController.current = initAbortInstance();
         }
     }, [startNewAbortController, abosrtController.current.signal.aborted]);
-    //only runs when component is unmounted, and controller.abort needs to be called to cancel fetch request
-    react.useEffect(() => {
-        return () => {
-            abosrtController.current.abort();
-        };
-    }, []);
     return abosrtController.current;
 };
+/*
+
+//check if abort controller is supported by the browser
+const isAbortControllerSupported = window.hasOwnProperty("AbortController");
+//if abort is not supported, pass a no-op function
+const abort = () => null;
+//a function that creates a new abort controller instance
+const initAbortInstance = () =>
+  isAbortControllerSupported
+    ? new AbortController()
+    : { signal: { aborted: false }, abort };
+
+type RefState =
+  | AbortController
+  | { signal: { aborted: boolean }; abort: () => void };
+
+ 
+
+ const useAbortController = (startNewAbortController: boolean = false) => {
+  const abosrtController = useRef<RefState>(null!);
+  //runs if new fetch request was ABORTED, and new abortController should be instantiated
+  //only runs when component is unmounted, and controller.abort needs to be called to cancel fetch request
+  useEffect(() => {
+    //set abort instance inside effect to handle serve side rendered app, e.g. NextJS
+    abosrtController.current = initAbortInstance();
+    return (): void => {
+      abosrtController.current.abort();
+    };
+  }, []);
+  useEffect((): void => {
+    //if startNewAbortController is true then new controller needs to be instantiated
+    //if abortController.current.signal.aborted is true, then request was aborted
+    if (startNewAbortController && abosrtController.current.signal.aborted) {
+      abosrtController.current = initAbortInstance();
+    }
+  }, [startNewAbortController, abosrtController.current.signal.aborted]);
+
+  return abosrtController.current;
+};
+
+export default useAbortController;
+
+*/
 
 const initial = { status: "idle", data: null, error: null };
 const reducer = (state, action) => {
@@ -363,20 +397,32 @@ const usePrevious = (val) => {
  * @param {string} key - key value of localStorage
  * @param {any} defaultValue - initial state value
  * @param {object} option - options object to control how to serialize/deserialize localStroage
- * @returns {Array} [state, setState] - first value is the state to be stored in localstorage, and the second value is the state setter function, essentially replicating how the React.useState API works
+ * @returns {Array} [state, setState] - first value is the state to be stored in localstorage, and the second value is the state setter function, essentially replicating how the useState API works
  */
-const useLocalStorage = (defaultValue = "", key, { serialize = JSON.stringify, deserailize = JSON.parse } = {}) => {
+function useLocalStorage(defaultValue, key, { serialize = JSON.stringify, deserailize = JSON.parse } = {}) {
     //lazyily load state
     const [state, setState] = react.useState(() => {
+        if (typeof window === "undefined")
+            return typeof defaultValue === "function"
+                ? defaultValue()
+                : defaultValue;
         const storedData = localStorage.getItem(key);
         if (storedData) {
             return deserailize(storedData);
         }
         //checks if defaultValue is a function - same as lazy loading useState value
-        return typeof defaultValue === "function" ? defaultValue() : defaultValue;
+        return typeof defaultValue === "function"
+            ? defaultValue()
+            : defaultValue;
     });
     //used to check if key was updated
     const prevKeyRef = react.useRef(key);
+    react.useEffect(() => {
+        const storedData = localStorage.getItem(key);
+        if (storedData) {
+            setState(deserailize(storedData));
+        }
+    }, []);
     react.useEffect(() => {
         const prevKey = prevKeyRef.current;
         if (prevKey !== key) {
@@ -387,14 +433,13 @@ const useLocalStorage = (defaultValue = "", key, { serialize = JSON.stringify, d
         localStorage.setItem(key, serialize(state));
     }, [key, state, serialize]);
     return [state, setState];
-};
+}
 
 const useWidth = (ref) => {
     //used for timer in debounce function
     const timerID = react.useRef(null);
     const [width, setWidth] = react.useState(null);
     react.useLayoutEffect(() => {
-        console.log("laytout effect called");
         //for easier read - not important
         const element = ref.current;
         //checks if ref is DOM node or window object

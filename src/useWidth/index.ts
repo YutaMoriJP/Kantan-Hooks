@@ -7,7 +7,6 @@ const useWidth = <T extends React.RefObject<HTMLElement> | { current: Window }>(
   const timerID = useRef<NodeJS.Timeout>(null!);
   const [width, setWidth] = useState(null);
   useLayoutEffect(() => {
-    console.log("laytout effect called");
     //for easier read - not important
     const element: (HTMLElement | Window) & {
       [key: string]: any;
