@@ -10,4 +10,6 @@ import useLocalStorage from "./useLocalStorage/useLocalStorage";
 import useWidth from "./useWidth";
 import useHeight from "./useHeight";
 import usePosition from "./usePosition";
-export { useToggle, useInput, useClipboard, useMediaQuery, useFetch, useAbortController, useHistory, usePrevious, useLocalStorage, useWidth, useHeight, usePosition, };
+import useHover from "./useHover";
+import useScrolled from "./useScrolled";
+export { useToggle, useInput, useClipboard, useMediaQuery, useFetch, useAbortController, useHistory, usePrevious, useLocalStorage, useWidth, useHeight, usePosition, useHover, useScrolled, };

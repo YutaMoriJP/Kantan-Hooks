@@ -13,7 +13,7 @@ function ___$insertStyle(css) {
 
 Object.defineProperty(exports, '__esModule', { value: true });
 
-var react = require('react');
+var React = require('react');
 var clipboard = require('clipboard-polyfill/text');
 
 function _interopNamespace(e) {
@@ -34,13 +34,14 @@ function _interopNamespace(e) {
   return Object.freeze(n);
 }
 
+var React__namespace = /*#__PURE__*/_interopNamespace(React);
 var clipboard__namespace = /*#__PURE__*/_interopNamespace(clipboard);
 
 const useToggle = (initial = false) => {
-    const [open, setOpen] = react.useState(initial);
-    const toggle = react.useCallback(() => setOpen(prevBool => !prevBool), []);
-    const onOpen = react.useCallback(() => setOpen(true), []);
-    const onClose = react.useCallback(() => setOpen(false), []);
+    const [open, setOpen] = React.useState(initial);
+    const toggle = React.useCallback(() => setOpen(prevBool => !prevBool), []);
+    const onOpen = React.useCallback(() => setOpen(true), []);
+    const onClose = React.useCallback(() => setOpen(false), []);
     return { open, toggle, onOpen, onClose };
 };
 
@@ -50,7 +51,7 @@ const useToggle = (initial = false) => {
  * @param {Object} options - The options object can have a handleChange method that restricts the new input field value. For example, if lower case isn't allowed, the function can return value.toUpperCase()
  */
 const useInput = (initial = "", options) => {
-    const [value, setValue] = react.useState(initial);
+    const [value, setValue] = React.useState(initial);
     const onChange = (event) => {
         //options object is not passed - run default behavior
         if (!options) {
@@ -65,7 +66,7 @@ const useInput = (initial = "", options) => {
             setValue(newValue);
         }
     };
-    const reset = react.useCallback(() => setValue(initial), []);
+    const reset = React.useCallback(() => setValue(initial), []);
     return [{ value, onChange }, reset];
 };
 
@@ -101,16 +102,16 @@ function __awaiter(thisArg, _arguments, P, generator) {
  * @param {Function} onOpen - opens a notification like 'value copied' or 'failed to copy'
  */
 const useClipboard = (toBeCopied, copied, onOpen) => {
-    const [{ status, error }, setStatus] = react.useState({
+    const [{ status, error }, setStatus] = React.useState({
         status: "idle",
         error: null,
     });
-    const [previous, setPrevious] = react.useState("");
+    const [previous, setPrevious] = React.useState("");
     //blocks copy function from running in initial mount, and only copies value to clipboard if user chooses to do so
-    const initialMount = react.useRef(true);
+    const initialMount = React.useRef(true);
     //copying to the clipboard is an asynchronous operation
     //so the async operation is run inside useEffect
-    react.useEffect(() => {
+    React.useEffect(() => {
         //will prevent setting state when component using this hook is unmounted
         let isCanceled = false;
         //if clipboard API is not supported, return an error message
@@ -181,18 +182,18 @@ const useClipboard = (toBeCopied, copied, onOpen) => {
 };
 
 const useMediaQuery = (query) => {
-    const [mediaQuery, setMediaQuery] = react.useState(() => {
+    const [mediaQuery, setMediaQuery] = React.useState(() => {
         //if code runs client side, then set media query immediately
         //if (typeof window !== "undefined") return window.matchMedia(query).matches;
         return false;
     });
-    const [resolved, setResolved] = react.useState(() => {
+    const [resolved, setResolved] = React.useState(() => {
         //if code is executed client side - resolved is true
         //if (typeof window !== "undefined") return true;
         //runs server side - resolved is false
         return false;
     });
-    react.useEffect(() => {
+    React.useEffect(() => {
         console.log("useMediaQuery window");
         const mql = window.matchMedia(query);
         setMediaQuery(window.matchMedia(query).matches);
@@ -230,17 +231,17 @@ const initAbortInstance = () => window.hasOwnProperty("AbortController")
  * @returns
  */
 const useAbortController = (startNewAbortController = false) => {
-    const abosrtController = react.useRef(null);
+    const abosrtController = React.useRef(null);
     //runs if new fetch request was ABORTED, and new abortController should be instantiated
     //only runs when component is unmounted, and controller.abort needs to be called to cancel fetch request
-    react.useEffect(() => {
+    React.useEffect(() => {
         //set abort instance inside effect to handle serve side rendered app, e.g. NextJS
         abosrtController.current = initAbortInstance();
         return () => {
             abosrtController.current.abort();
         };
     }, []);
-    react.useEffect(() => {
+    React.useEffect(() => {
         //if startNewAbortController is true then new controller needs to be instantiated
         //if abortController.current.signal.aborted is true, then request was aborted
         if (startNewAbortController && abosrtController.current.signal.aborted) {
@@ -308,8 +309,8 @@ const reducer = (state, action) => {
 };
 const useFetch = (url, getData, params = {}) => {
     const abortController = useAbortController(false);
-    const [{ status, data, error }, dispatch] = react.useReducer(reducer, initial);
-    react.useEffect(() => {
+    const [{ status, data, error }, dispatch] = React.useReducer(reducer, initial);
+    React.useEffect(() => {
         let isCanceled = false;
         const asyncSetState = () => __awaiter(void 0, void 0, void 0, function* () {
             try {
@@ -343,9 +344,9 @@ const useFetch = (url, getData, params = {}) => {
 };
 
 const useHistory = (value) => {
-    const [history, setHistory] = react.useState([]);
-    const initialRender = react.useRef(0);
-    react.useEffect(() => {
+    const [history, setHistory] = React.useState([]);
+    const initialRender = React.useRef(0);
+    React.useEffect(() => {
         //ensures state isn't set in initial render
         if (initialRender.current !== 0 && value !== null) {
             setHistory(prevHistory => [...prevHistory, value]);
@@ -385,8 +386,8 @@ const useHistory = (value) => {
  * @returns value of the previous render. ref updates will not cause a re-render unlike state
  */
 const usePrevious = (val) => {
-    const ref = react.useRef(null);
-    react.useEffect(() => {
+    const ref = React.useRef(null);
+    React.useEffect(() => {
         ref.current = val;
     }, [val, ref]);
     return ref.current;
@@ -401,7 +402,7 @@ const usePrevious = (val) => {
  */
 function useLocalStorage(defaultValue, key, { serialize = JSON.stringify, deserailize = JSON.parse } = {}) {
     //lazyily load state
-    const [state, setState] = react.useState(() => {
+    const [state, setState] = React.useState(() => {
         if (typeof window === "undefined")
             return typeof defaultValue === "function"
                 ? defaultValue()
@@ -416,14 +417,14 @@ function useLocalStorage(defaultValue, key, { serialize = JSON.stringify, desera
             : defaultValue;
     });
     //used to check if key was updated
-    const prevKeyRef = react.useRef(key);
-    react.useEffect(() => {
+    const prevKeyRef = React.useRef(key);
+    React.useEffect(() => {
         const storedData = localStorage.getItem(key);
         if (storedData) {
             setState(deserailize(storedData));
         }
     }, []);
-    react.useEffect(() => {
+    React.useEffect(() => {
         const prevKey = prevKeyRef.current;
         if (prevKey !== key) {
             //this means that the key value has changed, so old storage must be deleted
@@ -437,9 +438,9 @@ function useLocalStorage(defaultValue, key, { serialize = JSON.stringify, desera
 
 const useWidth = (ref) => {
     //used for timer in debounce function
-    const timerID = react.useRef(null);
-    const [width, setWidth] = react.useState(null);
-    react.useLayoutEffect(() => {
+    const timerID = React.useRef(null);
+    const [width, setWidth] = React.useState(null);
+    React.useLayoutEffect(() => {
         //for easier read - not important
         const element = ref.current;
         //checks if ref is DOM node or window object
@@ -475,9 +476,9 @@ const useWidth = (ref) => {
 
 const useHeight = (ref) => {
     //used for debounce function
-    const timerID = react.useRef(null);
-    const [height, setHeight] = react.useState(null);
-    react.useLayoutEffect(() => {
+    const timerID = React.useRef(null);
+    const [height, setHeight] = React.useState(null);
+    React.useLayoutEffect(() => {
         //checks if ref is dom node or window object
         const heightProp = Window.prototype.isPrototypeOf(ref.current)
             ? "innerHeight"
@@ -565,15 +566,70 @@ const usePosition = (ref) => {
     return calculateActualRect(rect, width, height);
 };
 
+const isDomNode = (element) => element !== null &&
+    (Object.getPrototypeOf(element) === HTMLElement.prototype ||
+        Object.getPrototypeOf(Object.getPrototypeOf(element)) ===
+            HTMLElement.prototype);
+const useHover = () => {
+    const [hovered, setHovered] = React.useState(false);
+    const ref = React.useRef(null);
+    console.log(ref);
+    React.useEffect(() => {
+        console.log(!isDomNode(ref.current));
+        console.log(ref.current);
+        if (!isDomNode(ref.current))
+            return;
+        console.log(!isDomNode(ref.current));
+        console.log(ref.current);
+        const handleoOver = () => setHovered(true);
+        const handleOut = () => setHovered(false);
+        const element = ref.current;
+        element.addEventListener("mouseover", handleoOver);
+        element.addEventListener("mouseout", handleOut);
+        return () => {
+            element.removeEventListener("mouseover", handleoOver);
+            element.removeEventListener("mouseout", handleOut);
+        };
+    }, [ref.current, setHovered]);
+    return [ref, hovered];
+};
+
+const useScrolled = () => {
+    //checks if user scrolled and scrolled to top
+    //used for styling
+    const [scrolled, setScrolled] = React__namespace.useState(false);
+    //used to clean up timer
+    const timerRef = React__namespace.useRef(null);
+    React__namespace.useEffect(() => {
+        //event handler when 'scroll' is called
+        const debounce = () => {
+            timerRef.current = setTimeout(() => {
+                setScrolled(true);
+                //if window.scrollY points at 0, then user is scrolled to the top, and scrolled state should be false
+                if (window.scrollY === 0) {
+                    setScrolled(false);
+                }
+            }, 450);
+        };
+        document.addEventListener("scroll", debounce);
+        return () => {
+            document.removeEventListener("scroll", debounce);
+        };
+    }, []);
+    return [scrolled, setScrolled];
+};
+
 exports.useAbortController = useAbortController;
 exports.useClipboard = useClipboard;
 exports.useFetch = useFetch;
 exports.useHeight = useHeight;
 exports.useHistory = useHistory;
+exports.useHover = useHover;
 exports.useInput = useInput;
 exports.useLocalStorage = useLocalStorage;
 exports.useMediaQuery = useMediaQuery;
 exports.usePosition = usePosition;
 exports.usePrevious = usePrevious;
+exports.useScrolled = useScrolled;
 exports.useToggle = useToggle;
 exports.useWidth = useWidth;
