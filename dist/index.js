@@ -184,20 +184,13 @@ const useClipboard = (toBeCopied, copied, onOpen) => {
 const useMediaQuery = (query) => {
     const [mediaQuery, setMediaQuery] = React.useState(() => {
         //if code runs client side, then set media query immediately
-        //if (typeof window !== "undefined") return window.matchMedia(query).matches;
-        return false;
-    });
-    const [resolved, setResolved] = React.useState(() => {
-        //if code is executed client side - resolved is true
-        //if (typeof window !== "undefined") return true;
-        //runs server side - resolved is false
+        if (typeof window !== "undefined")
+            return window.matchMedia(query).matches;
         return false;
     });
     React.useEffect(() => {
-        console.log("useMediaQuery window");
         const mql = window.matchMedia(query);
         setMediaQuery(window.matchMedia(query).matches);
-        setResolved(true);
         const onChange = () => setMediaQuery(window.matchMedia(query).matches);
         if ("addEventListener" in mql) {
             mql.addEventListener("change", onChange);
@@ -216,7 +209,7 @@ const useMediaQuery = (query) => {
             }
         };
     }, []);
-    return [mediaQuery, resolved];
+    return mediaQuery;
 };
 
 //if abort is not supported, pass a no-op function
@@ -619,6 +612,14 @@ const useScrolled = () => {
     return [scrolled, setScrolled];
 };
 
+const useMounted = () => {
+    const [mounted, setMounted] = React.useState(false);
+    React.useEffect(() => {
+        setMounted(true);
+    }, []);
+    return mounted;
+};
+
 exports.useAbortController = useAbortController;
 exports.useClipboard = useClipboard;
 exports.useFetch = useFetch;
@@ -628,6 +629,7 @@ exports.useHover = useHover;
 exports.useInput = useInput;
 exports.useLocalStorage = useLocalStorage;
 exports.useMediaQuery = useMediaQuery;
+exports.useMounted = useMounted;
 exports.usePosition = usePosition;
 exports.usePrevious = usePrevious;
 exports.useScrolled = useScrolled;

@@ -1,2 +1,2 @@
-declare const useMediaQuery: (query: string) => readonly [boolean, boolean];
+declare const useMediaQuery: (query: string) => boolean;
 export default useMediaQuery;

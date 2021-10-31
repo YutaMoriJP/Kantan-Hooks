@@ -28,9 +28,9 @@ function useLocalStorage<T>(
       ? (defaultValue as Function)()
       : defaultValue;
   });
+
   //used to check if key was updated
   const prevKeyRef = useRef(key);
-
   useEffect(() => {
     const storedData = localStorage.getItem(key);
     if (storedData) {

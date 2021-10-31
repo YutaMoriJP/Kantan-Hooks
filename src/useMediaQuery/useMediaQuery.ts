@@ -3,20 +3,12 @@ import { useState, useEffect } from "react";
 const useMediaQuery = (query: string) => {
   const [mediaQuery, setMediaQuery] = useState(() => {
     //if code runs client side, then set media query immediately
-    //if (typeof window !== "undefined") return window.matchMedia(query).matches;
-    return false;
-  });
-  const [resolved, setResolved] = useState((): boolean => {
-    //if code is executed client side - resolved is true
-    //if (typeof window !== "undefined") return true;
-    //runs server side - resolved is false
+    if (typeof window !== "undefined") return window.matchMedia(query).matches;
     return false;
   });
   useEffect(() => {
-    console.log("useMediaQuery window");
     const mql = window.matchMedia(query);
     setMediaQuery(window.matchMedia(query).matches);
-    setResolved(true);
     const onChange = (): void =>
       setMediaQuery(window.matchMedia(query).matches);
 
@@ -35,7 +27,7 @@ const useMediaQuery = (query: string) => {
       }
     };
   }, []);
-  return [mediaQuery, resolved] as const;
+  return mediaQuery;
 };
 
 export default useMediaQuery;

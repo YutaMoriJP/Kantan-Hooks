@@ -12,6 +12,7 @@ import useHeight from "./useHeight";
 import usePosition from "./usePosition";
 import useHover from "./useHover";
 import useScrolled from "./useScrolled";
+import useMounted from "./useMounted";
 
 export {
   useToggle,
@@ -28,4 +29,5 @@ export {
   usePosition,
   useHover,
   useScrolled,
+  useMounted,
 };
