@@ -1,34 +1,43 @@
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, useCallback } from "react";
+
+const MOUSE_EVENTS = ["mouseover", "mouseout"];
 
 const isDomNode = (element: null | HTMLElement) =>
   element !== null &&
   (Object.getPrototypeOf(element) === HTMLElement.prototype ||
-    Object.getPrototypeOf(Object.getPrototypeOf(element)) ===
-      HTMLElement.prototype);
+    Object.getPrototypeOf(Object.getPrototypeOf(element)) === HTMLElement.prototype);
 
 const useHover = () => {
   const [hovered, setHovered] = useState(false);
+
   const ref = useRef(null);
+
   useEffect(() => {
     if (!isDomNode(ref.current)) return;
 
-    const handleoOver = () => setHovered(true);
+    const handleOver = () => setHovered(true);
     const handleOut = () => setHovered(false);
+
     const element = ref.current! as HTMLElement;
-    element.addEventListener("mouseover", handleoOver);
-    element.addEventListener("mouseout", handleOut);
+
+    const registerEvent = (index: number) => (index === 0 ? handleOut : handleOver);
+
+    MOUSE_EVENTS.forEach((eventType, index) => element.addEventListener(eventType, registerEvent(index)));
+
     return () => {
-      element.removeEventListener("mouseover", handleoOver);
-      element.removeEventListener("mouseout", handleOut);
+      MOUSE_EVENTS.forEach((eventType, index) => element.removeEventListener(eventType, registerEvent(index)));
     };
   }, [ref.current, setHovered]);
+
   return [ref, hovered] as const;
 };
 
 export const useHoverReact = () => {
   const [hovered, setHovered] = useState(false);
-  const onMouseOver = () => setHovered(true);
-  const onMouseOut = () => setHovered(false);
+
+  const onMouseOver = useCallback(() => setHovered(true), []);
+  const onMouseOut = useCallback(() => setHovered(false), []);
+
   return [hovered, { onMouseOver, onMouseOut }] as const;
 };
 

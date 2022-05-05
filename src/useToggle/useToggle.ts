@@ -9,9 +9,11 @@ export type Toggle = {
 
 const useToggle = (initial: boolean = false): Toggle => {
   const [open, setOpen] = useState(initial);
-  const toggle = useCallback((): void => setOpen(prevBool => !prevBool), []);
+
+  const toggle = useCallback((): void => setOpen((prevBool) => !prevBool), []);
   const onOpen = useCallback((): void => setOpen(true), []);
   const onClose = useCallback((): void => setOpen(false), []);
+
   return { open, toggle, onOpen, onClose };
 };
 

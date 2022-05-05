@@ -1,10 +1,7 @@
 import { useState, useCallback } from "react";
 
 type Options = {
-  handleChange: (
-    value: string | number,
-    previousValue: string | number
-  ) => typeof value;
+  handleChange: (value: string | number, previousValue: string | number) => typeof value;
 };
 
 /**
@@ -15,9 +12,8 @@ type Options = {
 
 const useInput = (initial: string | number = "", options?: Options) => {
   const [value, setValue] = useState(initial);
-  const onChange = (
-    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ): void => {
+
+  const onChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>): void => {
     //options object is not passed - run default behavior
     if (!options) {
       setValue(event.currentTarget.value);
@@ -30,7 +26,9 @@ const useInput = (initial: string | number = "", options?: Options) => {
       setValue(newValue);
     }
   };
+
   const reset = useCallback(() => setValue(initial), []);
+
   return [{ value, onChange }, reset] as const;
 };
 
