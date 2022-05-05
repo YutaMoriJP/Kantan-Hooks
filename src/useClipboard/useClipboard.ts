@@ -27,14 +27,10 @@ type ClipboardState =
  * @param {Function} onOpen - opens a notification like 'value copied' or 'failed to copy'
  */
 
-const useClipboard = (
-  toBeCopied: string,
-  copied: boolean,
-  onOpen?: () => void
-) => {
+const useClipboard = (toBeCopied: string, copied: boolean, onOpen?: () => void) => {
   const [{ status, error }, setStatus] = useState<ClipboardState>({
     status: "idle",
-    error: null,
+    error: null
   });
   const [previous, setPrevious] = useState("");
   //blocks copy function from running in initial mount, and only copies value to clipboard if user chooses to do so
@@ -52,9 +48,7 @@ const useClipboard = (
       if (status !== "rejected")
         setStatus(() => ({
           status: "rejected",
-          error: new Error(
-            "Clipboard API is not supported, please use a modern browser like Chrome or Firefox"
-          ),
+          error: new Error("Clipboard API is not supported, please use a modern browser like Chrome or Firefox")
         }));
       return;
     }
@@ -80,10 +74,10 @@ const useClipboard = (
       } catch (error) {
         //promise was rejected, updates status to resolved
         if (!isCanceled)
-          setStatus(prevStatus => ({
+          setStatus((prevStatus) => ({
             ...prevStatus,
             status: "rejected",
-            error,
+            error
           }));
         //opens failure message
         if (typeof onOpen === "function") {
@@ -113,7 +107,7 @@ const useClipboard = (
     pending: status === "pending",
     resolved: status === "resolved",
     rejected: status === "rejected",
-    error,
+    error
   };
 };
 export default useClipboard;

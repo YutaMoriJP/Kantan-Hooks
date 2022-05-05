@@ -9,15 +9,8 @@ const isDomNode = (element: null | HTMLElement) =>
 const useHover = () => {
   const [hovered, setHovered] = useState(false);
   const ref = useRef(null);
-  console.log(ref);
-
   useEffect(() => {
-    console.log(!isDomNode(ref.current));
-    console.log(ref.current);
-
     if (!isDomNode(ref.current)) return;
-    console.log(!isDomNode(ref.current));
-    console.log(ref.current);
 
     const handleoOver = () => setHovered(true);
     const handleOut = () => setHovered(false);

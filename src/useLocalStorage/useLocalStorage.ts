@@ -28,15 +28,18 @@ function useLocalStorage<T>(
       ? (defaultValue as Function)()
       : defaultValue;
   });
-
   //used to check if key was updated
   const prevKeyRef = useRef(key);
+
+  //if data is stored in localStorage and app is rendered server side and window is undefined
+  //then set the state in useEffect
   useEffect(() => {
     const storedData = localStorage.getItem(key);
     if (storedData) {
       setState(deserailize(storedData));
     }
   }, []);
+
   useEffect(() => {
     const prevKey = prevKeyRef.current;
     if (prevKey !== key) {
